@@ -12,9 +12,16 @@ public class PriceGeneratorController {
 
         PriceGeneratorWrapper result = new PriceGeneratorWrapper();
 
-        result.opportunity = [SELECT Id, AccountId, Category_Picklist__c, Sub_Category_Picklist__c
-                              FROM Opportunity
-                              WHERE Id = :opportunityId];
+        if(opportunityId == null) return result;
+
+        List<Opportunity> oppList = [SELECT Id, AccountId, Category_Picklist__c, Sub_Category_Picklist__c
+                                     FROM Opportunity
+                                     WHERE Id = :opportunityId
+                                     LIMIT 1];
+
+        if(oppList.isEmpty()) return result;
+
+        result.opportunity = oppList[0];
 
         Id accountId = result.opportunity.AccountId;
 
@@ -31,7 +38,7 @@ public class PriceGeneratorController {
 
         result.suppliers = [SELECT Id, Name, Lumper__c,Landed__c,Sales_price__c,Category__c,Sub_Category__c,
                             Quantity_per_Pallet__c,Freight__c,Estimated_Profit__c,FOB_Location__c,Cost__c,
-                            Market__c,Price__c,Vendor__r.Name,Product__r.Name
+                            Market__c,Price__c,Vendor__c,Vendor__r.Name,Product__r.Name
                             FROM Supplier_Offer__c
                             WHERE Vendor__r.RecordType.Name = 'Supplier'
                             AND Category__c != NULL
@@ -44,15 +51,17 @@ public class PriceGeneratorController {
    @AuraEnabled
     public static void updateOpportunityWithVendor(Id opportunityId, Id supplierOfferId, String category, String subCategory) {
         
-    Supplier_Offer__c supplier = [SELECT Id, Vendor__r.Id 
+    if(opportunityId == null || supplierOfferId == null) return;
+
+    Supplier_Offer__c supplier = [SELECT Id, Vendor__c 
                                   FROM Supplier_Offer__c
                                   WHERE Id = :supplierOfferId
                                   LIMIT 1];
 
     Opportunity oppToUpdate = new Opportunity(Id = opportunityId);
 
-    if (supplier != null && supplier.Vendor__r != null) {
-        oppToUpdate.AccountId = supplier.Vendor__r.Id;
+    if (supplier != null && supplier.Vendor__c != null) {
+        oppToUpdate.AccountId = supplier.Vendor__c;
     }
 
     oppToUpdate.Category_Picklist__c = category;
@@ -63,6 +72,8 @@ public class PriceGeneratorController {
     
     @AuraEnabled
     public static Id createOpportunity(Opportunity opportunityData){
+
+    if(opportunityData == null || opportunityData.AccountId == null) return null;
 
     Opportunity opp = new Opportunity();
 
@@ -81,11 +92,12 @@ public class PriceGeneratorController {
     @AuraEnabled(cacheable=true)
     public static Id getCompetitorAccounts() {
         
-        RecordType rt = [SELECT Id
+        List<RecordType> rtList = [SELECT Id
                          FROM RecordType
                          WHERE SObjectType = 'Account'
-                         AND DeveloperName = 'Competitor'];
-        return rt.Id;
+                         AND DeveloperName = 'Competitor'
+                         LIMIT 1];
+        return rtList.isEmpty() ? null : rtList[0].Id;
     }
     
    public class AccountDataWrapper {
@@ -128,11 +140,7 @@ public class PriceGeneratorController {
                          WHERE Vendor__r.RecordType.Name = 'Supplier'
                          ORDER BY Vendor__r.Name];
         
-        if(!suppliers.isEmpty()) {
-            return suppliers;
-        }else {
-            return suppliers;
-        }
+        return suppliers;
     }
     
     @AuraEnabled
@@ -144,11 +152,11 @@ public class PriceGeneratorController {
     for (Supplier_Offer__c s : suppliers) {
         Supplier_Offer__c record = new Supplier_Offer__c(Id = s.Id);
 
-        if (s.FOB_Location__c != null) record.FOB_Location__c = s.FOB_Location__c;
-        if (s.Cost__c != null) record.Cost__c = s.Cost__c;
-        if (s.Market__c != null) record.Market__c = s.Market__c;
-        if (s.Freight__c != null) record.Freight__c = s.Freight__c;
-        if (s.Quantity_per_Pallet__c != null) record.Quantity_per_Pallet__c = s.Quantity_per_Pallet__c;
+        record.FOB_Location__c = s.FOB_Location__c;
+        record.Cost__c = s.Cost__c;
+        record.Market__c = s.Market__c;
+        record.Freight__c = s.Freight__c;
+        record.Quantity_per_Pallet__c = s.Quantity_per_Pallet__c;
 
         recordsToUpdate.add(record);
     }

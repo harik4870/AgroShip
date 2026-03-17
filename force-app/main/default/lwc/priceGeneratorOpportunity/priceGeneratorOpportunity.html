@@ -1,0 +1,76 @@
+<template>
+    <div class="main-container">
+
+        <div class="slds-page-header sticky-header">
+            <div class="slds-page-header__row">
+                <div class="slds-page-header__col-title">
+                    <h1 class="slds-page-header__title slds-text-align_center slds-truncate" title="Price Generator">
+                        Price Generator
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+    <div class="content">
+        <lightning-accordion allow-multiple-sections-open active-section-name={activeSections}>
+
+        <lightning-accordion-section name="OpportunityDetails" label="Opportunity Details">
+         <div class="section">
+            <div class="two-column">
+                <lightning-record-picker label="Account" object-api-name="Account" value={accountId} aria-placeholder="Search Accounts" onchange={handleAccountChange} required></lightning-record-picker>
+                <lightning-input label="Ship Period" value={stage} onchange={handleChange} data-field="StageName"></lightning-input>
+                <lightning-input type="PiCKlist" label="FOB" value={closeDate} onchange={handleChange} data-field="CloseDate"></lightning-input>
+                <lightning-combobox label="Category"  value={categoryValue} options={categoryOptions} onchange={handleCategoryChange} required></lightning-combobox>
+                <lightning-input label="Location" value={type} onchange={handleChange} data-field="Type"></lightning-input>
+                <lightning-dual-listbox name="subCategory" label="Sub Category" source-label="Available" selected-label="Selected" options={filteredSubCategoryOptions}
+                                        value={subCategoryValue} onchange={handleSubCategoryChange} disabled={isSubCategoryDisabled} required></lightning-dual-listbox>
+
+            </div>
+        </div>
+    </lightning-accordion-section>
+
+    <lightning-accordion-section name="Competitors" label="Competitors">
+    <template if:true={accountId}>
+        <template if:true={hasCompetitors}>
+            <lightning-datatable key-field="Id" data={competitors} columns={competitorColumns} hide-checkbox-column="true"></lightning-datatable>
+        </template>
+
+        <template if:false={hasCompetitors}>
+            <p class="displayWarning">No Competitors found for the selected account.</p>
+        </template>
+    </template>
+</lightning-accordion-section>
+
+    <lightning-accordion-section name="Opportunities" label="Latest Opportunities">
+      <template if:true={accountId}>
+         <template if:true={hasOpportunities}>
+            <lightning-datatable key-field="Id" data={opportunities} columns={opportunityColumns} hide-checkbox-column="true"></lightning-datatable>
+         </template>
+
+         <template if:false={hasOpportunities}>
+            <p class="displayWarning">No Opportunities found for the selected account.</p>
+         </template>
+      </template>
+</lightning-accordion-section>
+
+    <lightning-accordion-section name="Vendors" label="Vendors">
+        <template if:true={selectedVendor}>
+            <div class="opportunityButton">
+               <lightning-button label="Create Opportunity" onclick={createOpportunity} ></lightning-button>
+               <lightning-button label="Copy to Opportunity" onclick={copyToOpportunity} ></lightning-button>
+            </div>
+        </template>
+
+        <template if:true={hasVendors}>
+            <lightning-datatable key-field="Id" data={filteredVendors} columns={supplierColumns} draft-values={draftValues}
+                                 onsave={handleVendorSave} onrowselection={handleVendorSelection} max-row-selection="1">
+            </lightning-datatable>
+        </template>
+        <template if:false={hasVendors}>
+            <p class="displayWarning">No Vendors found for the selected categories</p>
+        </template>
+    </lightning-accordion-section>
+   </lightning-accordion>
+        </div>
+    </div>
+</template>

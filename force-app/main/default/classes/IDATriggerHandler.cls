@@ -18,6 +18,7 @@ public with sharing class IDATriggerHandler {
                 }
             }
         }
+        
         if(oldMap != null && newList == null){
             for(IDA__c oldRec : oldMap.values()){
                 if(oldRec.Account__c != null){

@@ -119,7 +119,6 @@ private class PriceGeneratorControllerTest {
         Test.startTest();
         PriceGeneratorController.AccountDataWrapper data = PriceGeneratorController.getcompetitorsAndOpportunities(acc.Id);
         Test.stopTest();
-
         System.assertNotEquals(null,data);
     }
 }
