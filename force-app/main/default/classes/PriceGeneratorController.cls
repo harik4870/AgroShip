@@ -47,13 +47,13 @@ public class PriceGeneratorController {
 
              return result;
        }
-    
+
    @AuraEnabled
     public static void updateOpportunityWithVendor(Id opportunityId, Id supplierOfferId, String category, String subCategory) {
-        
+
     if(opportunityId == null || supplierOfferId == null) return;
 
-    Supplier_Offer__c supplier = [SELECT Id, Vendor__c 
+    Supplier_Offer__c supplier = [SELECT Id, Vendor__c
                                   FROM Supplier_Offer__c
                                   WHERE Id = :supplierOfferId
                                   LIMIT 1];
@@ -69,7 +69,7 @@ public class PriceGeneratorController {
 
     update oppToUpdate;
   }
-    
+
     @AuraEnabled
     public static Id createOpportunity(Opportunity opportunityData){
 
@@ -87,11 +87,11 @@ public class PriceGeneratorController {
     insert opp;
 
     return opp.Id;
-  }   
-    
+  }
+
     @AuraEnabled(cacheable=true)
     public static Id getCompetitorAccounts() {
-        
+
         List<RecordType> rtList = [SELECT Id
                          FROM RecordType
                          WHERE SObjectType = 'Account'
@@ -99,7 +99,7 @@ public class PriceGeneratorController {
                          LIMIT 1];
         return rtList.isEmpty() ? null : rtList[0].Id;
     }
-    
+
    public class AccountDataWrapper {
         @AuraEnabled public List<Competitor__c> competitors;
         @AuraEnabled public List<Opportunity> opportunities;
@@ -112,7 +112,7 @@ public class PriceGeneratorController {
 
     @AuraEnabled(cacheable=true)
     public static AccountDataWrapper getcompetitorsAndOpportunities(Id accountId) {
-        
+
         AccountDataWrapper result = new AccountDataWrapper();
 
         if(accountId == null) return result;
@@ -130,7 +130,7 @@ public class PriceGeneratorController {
 
         return result;
     }
-    
+
     @AuraEnabled
     public static List<Supplier_Offer__c> getSuppliers() {
         List<Supplier_Offer__c> suppliers = new List<Supplier_Offer__c>();
@@ -139,13 +139,13 @@ public class PriceGeneratorController {
                          FROM Supplier_Offer__c
                          WHERE Vendor__r.RecordType.Name = 'Supplier'
                          ORDER BY Vendor__r.Name];
-        
+
         return suppliers;
     }
-    
+
     @AuraEnabled
     public static void updateSupplierOffers(List<Supplier_Offer__c> suppliers) {
-        
+
     if (suppliers == null || suppliers.isEmpty()) return;
     List<Supplier_Offer__c> recordsToUpdate = new List<Supplier_Offer__c>();
 

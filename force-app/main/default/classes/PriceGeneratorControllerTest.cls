@@ -43,7 +43,7 @@ private class PriceGeneratorControllerTest {
         Test.stopTest();
 
         System.assertNotEquals(null,newOppId);
-    } 
+    }
 
     @isTest
     static void testGetPriceGeneratorData(){

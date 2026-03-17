@@ -22,6 +22,7 @@ private class IDATriggerHandlerTest {
 
         System.assertEquals(false, acc1.IDA_exists__c);
         System.assertEquals(true, acc2.IDA_exists__c);
+
         delete ida;
 
         acc2 = [SELECT IDA_exists__c FROM Account WHERE Id = :acc2.Id];
